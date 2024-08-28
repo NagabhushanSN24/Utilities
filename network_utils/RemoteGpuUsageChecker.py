@@ -65,6 +65,7 @@ def print_all_free_gpus():
     username = 'nagabhushan'
     key_filepath = Path('/Users/nagabhushan/SpreeAI/Docs/Softwares/AWS/AWS_Nagabhushan_RSA')
     machines = {
+        'ML-15': '10.2.101.223',
         'ML-14': '10.2.87.134',
         'ML-13': '10.2.94.212',
         'ML-12': '10.2.90.61',
@@ -73,8 +74,12 @@ def print_all_free_gpus():
         'ML-09': '10.2.93.229',
         'ML-08': '10.2.92.231',
         'ML-07': '10.2.92.197',
+        'ML-06': '10.2.95.234',
         'ML-05': '10.2.94.216',
+        'ML-04': '10.2.81.86',
         'ML-03': '10.2.83.214',
+        'ML-02': '10.2.84.221',
+        'ML-01': '10.2.84.61',
     }
 
     free_gpus = 'The below GPUs are available:\n\n'
