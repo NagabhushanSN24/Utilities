@@ -65,6 +65,9 @@ gh repo create "$USERNAME/$REPO_NAME" --private
 # Add the new private repository as a remote
 git remote add private "https://github.com/$USERNAME/$REPO_NAME.git"
 
+# Increase buffer size to push large objects
+git config http.postBuffer 524288000
+
 # Push all branches and tags to the private repository
 git push --mirror private
 
