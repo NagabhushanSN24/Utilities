@@ -73,11 +73,11 @@ for REMOTE_BRANCH in $REMOTE_BRANCHES; do
     echo "Processing branch: $REMOTE_BRANCH"
 
     # Checkout the remote branch locally
-    git checkout -B "$REMOTE_BRANCH" "origin/$REMOTE_BRANCH"
+#    git checkout -B "$REMOTE_BRANCH" "origin/$REMOTE_BRANCH"
     git checkout -B "$REMOTE_BRANCH" "refs/heads/$REMOTE_BRANCH"
 
     # Check if the branch exists in the remote private repository
-    if git ls-remote --heads origin "$REMOTE_BRANCH" | grep "$REMOTE_BRANCH" >/dev/null; then
+#    if git ls-remote --heads origin "$REMOTE_BRANCH" | grep "$REMOTE_BRANCH" >/dev/null; then
     if git ls-remote --heads origin "refs/heads/$REMOTE_BRANCH" | grep "$REMOTE_BRANCH" >/dev/null; then
         echo "Branch $REMOTE_BRANCH exists in remote. Checking for differences..."
 
