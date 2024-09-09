@@ -1,5 +1,6 @@
 #!/bin/bash
 # Synchronizes changes from a public repository to a private fork and creates pull requests for each branch with new changes
+# Also pushes new tags that are not in the private fork
 # Example usage: bash PullPublicRepoToPrivateFork.sh https://github.com/octocat/public-repo my_private_repo_name
 
 # Function to display usage information
@@ -44,11 +45,12 @@ git config http.postBuffer 524288000
 git config http.maxRequestBuffer 1024M
 git config core.compression -1
 
-# Fetch all branches from the public repository
-git fetch origin --prune
+# Fetch all branches and tags from the public repository
+git fetch origin --prune --tags
 
 # Get the names of all remote branches upfront and store them in a variable
-REMOTE_BRANCHES=$(git branch -r | grep 'origin/' | grep -v '\->' | sed 's|origin/||')
+# REMOTE_BRANCHES=$(git branch -r | grep 'origin/' | grep -v '\->' | sed 's|origin/||')
+REMOTE_BRANCHES=$(git for-each-ref --format '%(refname:short)' refs/remotes/origin | grep -v 'HEAD\|tags/')
 echo "Remote branches found: $REMOTE_BRANCHES"
 
 # Set the private repository as the new remote
@@ -73,12 +75,10 @@ for REMOTE_BRANCH in $REMOTE_BRANCHES; do
     echo "Processing branch: $REMOTE_BRANCH"
 
     # Checkout the remote branch locally
-#    git checkout -B "$REMOTE_BRANCH" "origin/$REMOTE_BRANCH"
-    git checkout -B "$REMOTE_BRANCH" "refs/heads/$REMOTE_BRANCH"
+    git checkout -B "$REMOTE_BRANCH" "origin/$REMOTE_BRANCH"
 
     # Check if the branch exists in the remote private repository
-#    if git ls-remote --heads origin "$REMOTE_BRANCH" | grep "$REMOTE_BRANCH" >/dev/null; then
-    if git ls-remote --heads origin "refs/heads/$REMOTE_BRANCH" | grep "$REMOTE_BRANCH" >/dev/null; then
+    if git ls-remote --heads origin "$REMOTE_BRANCH" | grep "$REMOTE_BRANCH" >/dev/null; then
         echo "Branch $REMOTE_BRANCH exists in remote. Checking for differences..."
 
         # Check if there are any commits in the local branch that are not in the remote
@@ -101,6 +101,23 @@ for REMOTE_BRANCH in $REMOTE_BRANCHES; do
     else
         echo "Branch $REMOTE_BRANCH does not exist in the remote. Pushing branch..."
         git push -u origin "$REMOTE_BRANCH"
+    fi
+done
+
+# Get all tags from the public repository
+REMOTE_TAGS=$(git ls-remote --tags origin | grep -o 'refs/tags/[a-zA-Z0-9._-]*$' | sed 's/refs\/tags\///')
+echo "Remote tags found: $REMOTE_TAGS"
+
+# Loop through all tags in the remote public repository
+for TAG in $REMOTE_TAGS; do
+    echo "Processing tag: $TAG"
+
+    # Check if the tag exists in the remote private repository
+    if git ls-remote --tags origin "$TAG" | grep "$TAG" >/dev/null; then
+        echo "Tag $TAG already exists in the remote. Skipping..."
+    else
+        echo "Tag $TAG does not exist in the remote. Pushing tag..."
+        git push origin "refs/tags/$TAG"
     fi
 done
 
