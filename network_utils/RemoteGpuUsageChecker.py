@@ -52,16 +52,18 @@ def get_free_gpu_cards(name: str, ip: str, username: str, key_filepath: Path):
 
     num_free_cards = 0
     free_cards = ''
+    free_card_nums = []
     for i in range(len(mem_free)):
         if (mem_free[i]/total_mems[i] > 0.5) and (utils[i] < 50):
             num_free_cards += 1
             free_cards += f'{name} ({ip}) Card {i}: Available Memory {mem_free[i]}/{total_mems[i]}; GPU Utilization {utils[i]}%\n'
+            free_card_nums.append(i)
     # close the SSH connection
     ssh.close()
-    return num_free_cards, free_cards
+    return num_free_cards, free_cards, free_card_nums
 
 
-def print_all_free_gpus():
+def print_all_free_gpus_mlxx():
     username = 'nagabhushan'
     key_filepath = Path('/Users/nagabhushan/SpreeAI/Docs/Softwares/AWS/AWS_Nagabhushan_RSA')
     machines = {
@@ -70,7 +72,7 @@ def print_all_free_gpus():
         'ML-13': '10.2.94.212',
         'ML-12': '10.2.90.61',
         'ML-11': '10.2.80.234',
-        'ML-10': '10.2.98.31',
+        'ML-10': '10.2.100.226',
         'ML-09': '10.2.93.229',
         'ML-08': '10.2.92.231',
         'ML-07': '10.2.92.197',
@@ -85,7 +87,7 @@ def print_all_free_gpus():
     free_gpus = 'The below GPUs are available:\n\n'
     for name, ip in machines.items():
         try:
-            num_free_cards, free_cards = get_free_gpu_cards(name, ip, username, key_filepath)
+            num_free_cards, free_cards, _ = get_free_gpu_cards(name, ip, username, key_filepath)
             if num_free_cards > 0:
                 print_text = f'{num_free_cards} cards available in {name} ({ip})\n' + free_cards
             else:
@@ -95,6 +97,48 @@ def print_all_free_gpus():
             print_text = f'Unable to connect to {name} ({ip})\n'
             free_gpus += print_text
         print(print_text)
+    return free_gpus
+
+
+def print_all_free_gpus_lambda():
+    username = 'ubuntu'
+    key_filepath = Path('/Users/nagabhushan/SpreeAI/Docs/Softwares/LambdaOnDemand/LOD_Nagabhushan_RSA')
+    machines = {
+        'Naga_DataGen01': '129.213.16.35',
+        'Naga_DataGen02': '129.158.205.116',
+        'Naga_DataGen03': '129.158.250.85',
+        'Naga_DataGen04': '146.235.208.140',
+        'Naga_DataGen05': '150.136.34.93',
+    }
+
+    free_gpus = 'The below GPUs are available:\n\n'
+    for name, ip in machines.items():
+        free_card_nums_avg = None
+        print_texts = []
+        for i in range(5):
+            try:
+                num_free_cards, free_cards, free_card_nums = get_free_gpu_cards(name, ip, username, key_filepath)
+                if free_card_nums_avg is None:
+                    free_card_nums_avg = free_card_nums
+                else:
+                    free_card_nums_avg = set(free_card_nums_avg).intersection(set(free_card_nums))
+                if num_free_cards > 0:
+                    print_text = f'{num_free_cards} cards available in {name} ({ip})\n' + free_cards
+                else:
+                    print_text = f'No cards free in {name} ({ip})\n'
+                    print(print_text)
+                    break
+                free_gpus += free_cards
+            except Exception:
+                print_text = f'Unable to connect to {name} ({ip})\n'
+                free_gpus += print_text
+            # print(print_text)
+            print_texts.append(print_text)
+            time.sleep(5)
+        if len(free_card_nums_avg) > 0:
+            print(f'Cards free in {name} ({ip}): {free_card_nums_avg}\n')
+            for print_text in print_texts:
+                print(print_text)
     return free_gpus
 
 
@@ -129,7 +173,8 @@ def demo1():
 
 
 def demo2():
-    print_all_free_gpus()
+    print_all_free_gpus_mlxx()
+    # print_all_free_gpus_lambda()
     return
 
 
