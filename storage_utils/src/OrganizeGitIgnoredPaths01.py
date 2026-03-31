@@ -89,7 +89,7 @@ def main():
     if args.verbose:
         list_args.append('--verbose')
     
-    if not run_script('ListGitIgnoredPaths04', list_args, args.verbose):
+    if not run_script('ListGitIgnoredPaths05', list_args, args.verbose):
         print('ERROR: Failed to list git-ignored paths.')
         return False
     
@@ -122,7 +122,7 @@ def main():
     if args.verbose:
         symlink_args.append('--verbose')
     
-    if not run_script('SymlinkGitIgnoredPaths01', symlink_args, args.verbose):
+    if not run_script('SymlinkGitIgnoredPaths02', symlink_args, args.verbose):
         print('ERROR: Failed to create symlinks.')
         return False
     
