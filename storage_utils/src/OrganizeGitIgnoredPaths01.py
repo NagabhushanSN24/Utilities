@@ -122,7 +122,7 @@ def main():
     if args.verbose:
         symlink_args.append('--verbose')
     
-    if not run_script('SymlinkGitIgnoredPaths02', symlink_args, args.verbose):
+    if not run_script('SymlinkGitIgnoredPaths03', symlink_args, args.verbose):
         print('ERROR: Failed to create symlinks.')
         return False
     
